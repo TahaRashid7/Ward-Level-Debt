@@ -34,7 +34,21 @@ If the page appears blank or slow to load initially, please wait a moment while 
 │       └── keep-streamlit-alive.yml  # GitHub Actions workflow to keep app awake
 ├── Presentation/             # Slide deck
 ├── code/cleaning/            # Data cleaning scripts
-├── data/                     # Processed data files
+├── data/
+│   ├── raw-data/             # Original source files
+│   │   ├── foreclosures_chicago_wards_clean.csv
+│   │   ├── vacant_minimal.csv
+│   │   ├── wards_2023_with_2024_foreclosures.geojson
+│   │   └── wards_shapefile.csv
+│   └── derived-data/         # Processed outputs
+│       ├── Merged_data.csv
+│       ├── demolition_with_ward.csv
+│       ├── foreclosure.csv
+│       ├── vacant_minimal.csv
+│       ├── vacant_with_ward_2023.geojson
+│       ├── ward_debt_summary.csv
+│       ├── wards_2023_final_dashboard.geojson
+│       └── zip_ward_lookup.csv
 ├── streamlit-app/            # Dashboard code and dependencies
 ├── final_project.qmd         # Writeup source file
 ├── final_project.html        # Rendered writeup
