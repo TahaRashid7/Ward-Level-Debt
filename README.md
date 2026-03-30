@@ -16,7 +16,7 @@ Several datasets exceed GitHub's 100MB file size limit and are hosted externally
 
 ## Streamlit App
 
-The interactive dashboard is deployed at: [https://wardleveldebt.streamlit.app]
+The interactive dashboard is deployed at: [https://ward-level-debt.streamlit.app]
 
 Running the Streamlit Dashboard
 
