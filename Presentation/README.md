@@ -1,1 +1,1 @@
-
+4-minute video overview of the Housing Distress Index dashboard covering key findings: geographic concentration of distress on Chicago's South and West sides, penalty share of outstanding debt, and city vs private demolition patterns across wards.
