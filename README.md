@@ -29,11 +29,16 @@ If the page appears blank or slow to load initially, please wait a moment while 
 ## Repository Structure
 
 ```
-├── dataset/
-│   ├── raw/          # Original unmodified source files
-│   └── cleaned/      # Processed outputs from preprocessing.py
-├── streamlit-app/    # Dashboard code and dependencies
-├── preprocessing.py  # Data wrangling and index computation
-├── final_project.qmd # Writeup source file
+├── .github/
+│   └── workflows/
+│       └── keep-streamlit-alive.yml  # GitHub Actions workflow to keep app awake
+├── Presentation/             # Slide deck
+├── code/cleaning/            # Data cleaning scripts
+├── data/                     # Processed data files
+├── streamlit-app/            # Dashboard code and dependencies
+├── final_project.qmd         # Writeup source file
+├── final_project.html        # Rendered writeup
+├── final_project.pdf         # Rendered writeup (PDF)
+├── requirements.txt          # Python dependencies
 └── README.md
 ```
