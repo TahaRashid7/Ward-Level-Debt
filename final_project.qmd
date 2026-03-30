@@ -1,0 +1,279 @@
+---
+title: "The Cycle of Disinvestment"
+subtitle: "Turning Property Distress into Policy Opportunity"
+format:
+  html: default
+  pdf:
+    documentclass: article
+    fontsize: 10pt
+    geometry: top=0.75in, bottom=0.75in, left=0.85in, right=0.85in
+    include-in-header:
+      text: |
+        \usepackage{fvextra}
+        \usepackage{float}
+        \usepackage{booktabs}
+        \usepackage{parskip}
+        \usepackage{titlesec}
+        \usepackage{xcolor}
+        \usepackage[T1]{fontenc}
+        \usepackage{microtype}
+        \usepackage{lmodern}
+        \usepackage{enumitem}
+        \usepackage{fancyhdr}
+        \usepackage{titling}
+        \usepackage{multicol}
+        \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+
+        % Colors
+        \definecolor{chicagored}{HTML}{B22222}
+        \definecolor{accentnavy}{HTML}{1B2A4A}
+        \definecolor{rulegray}{HTML}{CCCCCC}
+        \definecolor{mutedtext}{HTML}{555555}
+        \definecolor{slatebg}{HTML}{F0F2F5}
+
+        % Spacing
+        \setlength{\parskip}{3pt}
+        \setlength{\parindent}{0pt}
+
+        % Section formatting
+        \titleformat{\section}
+          {\color{accentnavy}\normalfont\large\bfseries}
+          {}{0em}{}[{\color{rulegray}\titlerule[0.4pt]}]
+        \titlespacing*{\section}{0pt}{8pt}{3pt}
+
+        \titleformat{\subsection}
+          {\color{chicagored}\normalfont\normalsize\bfseries}
+          {}{0em}{}
+        \titlespacing*{\subsection}{0pt}{5pt}{1pt}
+
+        % Title block
+        \pretitle{\begin{center}\color{accentnavy}\LARGE\bfseries}
+        \posttitle{\par\end{center}\vspace{2pt}
+          \begin{center}\color{mutedtext}\large\itshape}
+        \preauthor{\par\end{center}\vspace{4pt}
+          \begin{center}\small\color{mutedtext}}
+        \postauthor{\end{center}}
+        \predate{}
+        \postdate{\vspace{-8pt}}
+
+        % Header/footer
+        \pagestyle{fancy}
+        \fancyhf{}
+        \fancyhead[L]{\small\color{mutedtext}The Cycle of Disinvestment}
+        \fancyhead[R]{\small\color{mutedtext}PPHA 30538 · University of Chicago}
+        \fancyfoot[C]{\small\thepage}
+        \renewcommand{\headrulewidth}{0.3pt}
+        \renewcommand{\footrulewidth}{0pt}
+
+        % List spacing
+        \setlist[itemize]{noitemsep, topsep=2pt, parsep=0pt, leftmargin=14pt}
+        \setlist[enumerate]{noitemsep, topsep=2pt, parsep=0pt, leftmargin=14pt}
+author:
+  - "Aishani Mathur"
+  - "Ayusha Aryal"
+  - "Taha Rashid"
+date: "March 9, 2026"
+editor: source
+execute-dir: project
+execute:
+  echo: false
+  warning: false
+---
+
+::: {.content-visible when-format="html"}
+<p style="text-align:center; color:#555; font-size:0.9em; margin-top:-10px;">
+M/W 10:30 &nbsp;·&nbsp; GitHub: aishanimathur · aaryal22 · TahaRashid7
+</p>
+:::
+
+```{=latex}
+\begin{center}
+\small\textcolor{mutedtext}{M/W 10:30 \quad GitHub: aishanimathur \textperiodcentered\ aaryal22 \textperiodcentered\ TahaRashid7}
+\end{center}
+\vspace{4pt}
+```
+
+## A. Research Question
+
+This project asks two questions about housing distress across Chicago's 50 wards:
+
+1. **Which wards show early warning signs of future housing instability?** Where is the disinvestment pipeline just beginning, and where can the city still intervene?
+2. **In what wards do multiple stages of housing distress overlap simultaneously?** A ward scoring high across debt, demolitions, vacancy, and foreclosures is deeply embedded in a crisis — requiring a different policy response than one just entering it.
+
+Chicago has long treated property debt and vacant land as separate problems. By the time a property becomes vacant land, the city has already lost twice: once in unpaid utility revenue and again in demolition costs. This project builds a framework to identify where the next loss may occur *before* it happens.
+
+## B. Methodology
+
+Property abandonment follows a predictable pipeline: missed utility payments → debt accumulation → compounding penalties → financial insolvency → owner walkaway → demolition → vacant land. We assembled four ward-level datasets to capture each stage.
+
+\vspace{4pt}
+\noindent\colorbox{slatebg}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+\vspace{4pt}
+\textbf{Foreclosure Filings} \textit{(early financial stress)} --- Scraped from the Institute for Housing Studies data portal; geographic labels cleaned to numeric ward IDs.
+
+\smallskip
+\textbf{Outstanding Utility Debt 365+ days overdue} \textit{(accumulating distress)} --- From the Chicago Dept.\ of Finance, 143{,}000+ parcel accounts. No ward IDs existed --- only ZIP codes --- so we built a ZIP-to-ward crosswalk via spatial intersection of boundary polygons, proportionally allocating accounts spanning multiple wards.
+
+\smallskip
+\textbf{Demolition Permit Records} \textit{(structural failure)} --- From the City of Chicago Data Portal. 21{,}000+ permits geocoded via the U.S.\ Census Geocoder API and spatially joined to ward polygons using GeoPandas. City-initiated and private demolitions were distinguished.
+
+\smallskip
+\textbf{Vacant Land} \textit{(final outcome)} --- From the Cook County Assessor's Parcel Universe. Coordinates converted to point geometries and spatially joined to ward boundaries. A lightweight file (\texttt{vacant\_minimal.csv}) was created to handle the 1.8M+ record dataset.
+\vspace{4pt}
+}}
+\vspace{4pt}
+
+All indicators were aggregated to Chicago's 50 wards and merged on ward ID. A **Housing Distress Index** was constructed by normalizing and averaging all four indicators, grouping wards into **Low Risk**, **Watch**, and **Critical** tiers.
+
+\newpage
+
+## C. Key Findings
+
+### Vacant Land is Highly Concentrated in a Few Wards
+
+```{python}
+#| eval: true
+#| echo: false
+#| warning: false
+import pandas as pd
+import altair as alt
+from pathlib import Path
+import warnings
+warnings.filterwarnings('ignore')
+alt.renderers.enable("png")
+alt.data_transformers.disable_max_rows()
+
+base_dir    = Path.cwd()
+cleaned_dir = base_dir / "data" / "derived-data"
+
+df   = pd.read_csv(cleaned_dir / "Merged_data.csv")
+debt = pd.read_csv(cleaned_dir / "ward_debt_summary.csv")
+
+top5    = df.nlargest(5, "vacant_land").copy()
+bottom5 = df.nsmallest(5, "vacant_land").copy()
+top5["group"]    = "Top 5"
+bottom5["group"] = "Bottom 5"
+combined             = pd.concat([top5, bottom5])
+combined["ward_num"] = combined["ward_num"].astype(str)
+combined["label"]    = combined["vacant_land"].astype(int).astype(str)
+
+bars = alt.Chart(combined).mark_bar(cornerRadiusTopRight=3, cornerRadiusBottomRight=3).encode(
+    alt.X("vacant_land:Q", title="Vacant land parcels",
+          axis=alt.Axis(labelFontSize=8, titleFontSize=9)),
+    alt.Y("ward_num:O", sort=alt.SortField("vacant_land", order="descending"),
+          title="Ward", axis=alt.Axis(labelFontSize=8, titleFontSize=9)),
+    color=alt.Color("group:N",
+        scale=alt.Scale(domain=["Top 5", "Bottom 5"], range=["#B22222", "#4A7BA7"]),
+        legend=alt.Legend(title=None, labelFontSize=8, orient="bottom-right")))
+
+text_labels = alt.Chart(combined).mark_text(align="left", dx=4, fontSize=8).encode(
+    alt.X("vacant_land:Q"),
+    alt.Y("ward_num:O", sort=alt.SortField("vacant_land", order="descending")),
+    text="label:N")
+
+(bars + text_labels).properties(
+    title=alt.TitleParams("Top & Bottom 5 Wards by Vacant Land Parcels",
+        fontSize=10, fontWeight="bold", color="#1B2A4A", anchor="start"),
+    width=420, height=150
+).configure_view(strokeWidth=0, fill="#F0F2F5"
+).configure_axis(gridColor="#E0E0E0", domainColor="#CCCCCC")
+```
+
+South and West Side wards hold thousands of vacant parcels; several North Side wards report fewer than 50. Vacancy is spatially concentrated — not a citywide problem — and demands geographically targeted intervention.
+
+\begin{multicols}{2}
+
+\subsubsection*{Foreclosures Peaked 2008--2010}
+
+```{python}
+years  = list(range(2005, 2025))
+totals = [{"year": str(y), "total": df["foreclosure_" + str(y)].sum()} for y in years]
+foreclosure_df = pd.DataFrame(totals)
+
+area = alt.Chart(foreclosure_df).mark_area(
+    color="#B22222", opacity=0.12, interpolate="monotone").encode(
+    alt.X("year:O"), alt.Y("total:Q"))
+line = alt.Chart(foreclosure_df).mark_line(
+    color="#B22222", strokeWidth=2, interpolate="monotone").encode(
+    alt.X("year:O", title="Year",
+          axis=alt.Axis(labelAngle=-45, labelFontSize=7, titleFontSize=8)),
+    alt.Y("total:Q", title="Foreclosures",
+          scale=alt.Scale(domain=[0, 200]),
+          axis=alt.Axis(labelFontSize=7, titleFontSize=8)))
+points = alt.Chart(foreclosure_df).mark_point(
+    color="#B22222", filled=True, size=25).encode(
+    alt.X("year:O"), alt.Y("total:Q"))
+
+(area + line + points).properties(
+    title=alt.TitleParams("Total Foreclosures in Chicago",
+        fontSize=9, fontWeight="bold", color="#1B2A4A", anchor="start"),
+    width=190, height=130
+).configure_view(strokeWidth=0, fill="#F0F2F5"
+).configure_axis(gridColor="#E8E8E8", domainColor="#CCCCCC")
+```
+
+Foreclosures peaked 2008--2010 with the financial crisis, then declined sharply. A COVID moratorium drove the 2019--2020 dip; a modest rebound followed in 2021.
+
+\columnbreak
+
+\subsubsection*{Utility Debt Dominated by Water}
+
+```{python}
+debt = debt.rename(columns={
+    "Water (Service)": "Water Bal.", "Sewer (Service)": "Sewer Bal.",
+    "Water Penalty": "Water Pen.", "Sewer Penalty": "Sewer Pen.",
+    "Water Tax (Service)": "Water Tax", "Sewer Tax (Service)": "Sewer Tax",
+    "Garbage Penalty": "Garbage Pen."})
+debt_categories = ["Water Bal.","Sewer Bal.","Water Pen.","Sewer Pen.",
+                   "Water Tax","Sewer Tax","Garbage Pen."]
+debt_df = pd.DataFrame([{"category": c, "total_M": debt[c].sum()/1_000_000}
+                        for c in debt_categories])
+debt_df["label"] = "$" + debt_df["total_M"].round(0).astype(int).astype(str) + "M"
+
+bars2 = alt.Chart(debt_df).mark_bar(
+    cornerRadiusTopRight=3, cornerRadiusBottomRight=3, color="#8B0000").encode(
+    alt.X("total_M:Q", title="Balance ($M)",
+          axis=alt.Axis(labelFontSize=7, titleFontSize=8)),
+    alt.Y("category:N", sort=alt.SortField("total_M", order="descending"),
+          title=None, axis=alt.Axis(labelFontSize=7)))
+text2 = alt.Chart(debt_df).mark_text(align="left", dx=3, fontSize=7).encode(
+    alt.X("total_M:Q"),
+    alt.Y("category:N", sort=alt.SortField("total_M", order="descending")),
+    text="label:N")
+
+(bars2 + text2).properties(
+    title=alt.TitleParams("Outstanding Utility Debt by Category",
+        fontSize=9, fontWeight="bold", color="#1B2A4A", anchor="start"),
+    width=190, height=130
+).configure_view(strokeWidth=0, fill="#F0F2F5"
+).configure_axis(gridColor="#E8E8E8", domainColor="#CCCCCC")
+```
+
+Water balance dominates city-wide debt. In Critical-tier wards, penalties reach **46% of total debt** — a targeted waiver program could reduce burden without forgiving legitimate service charges.
+
+\end{multicols}
+
+\newpage
+
+## D. Dashboard, Policy Implications \& Limitations
+
+**Dashboard:** [wardleveldebt.streamlit.app](https://wardleveldebt.streamlit.app) — The same wards recur at every pipeline stage; water debt reliably proxies broader property distress; penalty accumulation amplifies distress in Critical-tier wards well beyond original service costs.
+
+### Policy Implications
+
+The pipeline must be interrupted **early** — before foreclosure, not after demolition.
+
+1. **Targeted penalty waivers** — In Critical-tier wards, penalties comprise up to 46% of total debt; waivers reduce burden without forgiving core service charges.
+2. **Proactive debt intervention** — Restructuring plans, owner outreach, and connection to assistance programs before properties become financially underwater.
+3. **Preventive maintenance support** — Inspections and repair grants for Watch-tier wards; deterioration prevention is cheaper than demolition.
+4. **Land bank & rehabilitation programs** — Extended to Critical-tier wards already past the tipping point.
+
+### Difficulties Encountered
+
+The Cook County Assessor dataset (1.8M+ records) required a coordinate-only lightweight file for tractable spatial processing. Demolition permits required geocoding 21,000+ addresses via repeated Census API requests with careful rate-limit management. Ward identifiers were formatted inconsistently across all sources and required harmonization before merging.
+
+### Limitations
+
+- **Administrative data bias** — Records capture only formal government interactions; early-stage distress may be underrepresented.
+- **Equal-weight index** — The Housing Distress Index assigns equal weight to all four indicators, which may not reflect true relative severity.
+- **Cross-sectional design** — Most indicators reflect a single point in time, limiting causal inference about how properties move through the pipeline.
