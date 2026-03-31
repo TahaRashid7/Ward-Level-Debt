@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping ward-level-debt
-        run: curl -s -o /dev/null -w "%{http_code}\n" https://ward-level-debt.streamlit.app/
+        run: curl -s -o /dev/null -w "%{http_code}\n" https://ward-level-debt.streamlit.app/_stcore/health
