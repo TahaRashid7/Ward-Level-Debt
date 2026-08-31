@@ -196,29 +196,29 @@ color_scales = {
 }
 
 if map_metric == "Risk tier":
-    fig = px.choropleth_mapbox(
+    fig = px.choropleth_map(
         gdf, geojson=gdf.__geo_interface__, locations="ward",
         featureidkey="properties.ward", color="risk_tier",
-        mapbox_style="carto-positron", opacity=0.8, hover_data=hover_cols,
+        map_style="carto-positron", opacity=0.8, hover_data=hover_cols,
         color_discrete_map={"Low": "#2ecc71", "Watch": "#f1c40f", "Critical": "#e74c3c"}
     )
 else:
-    fig = px.choropleth_mapbox(
+    fig = px.choropleth_map(
         gdf, geojson=gdf.__geo_interface__, locations="ward",
         featureidkey="properties.ward", color=map_metric,
-        mapbox_style="carto-positron", opacity=0.75, hover_data=hover_cols,
+        map_style="carto-positron", opacity=0.75, hover_data=hover_cols,
         color_continuous_scale=color_scales.get(map_metric, "Blues")
     )
 
 fig.update_layout(
-    mapbox=dict(center=dict(lat=41.85, lon=-87.68), zoom=9.4),
+    map=dict(center=dict(lat=41.85, lon=-87.68), zoom=9.4),
     margin={"r": 0, "t": 0, "l": 0, "b": 0}
 )
 
 if selected_ward != "Citywide":
     if show_parcels:
         filtered = vacant[vacant["ward_spatial"] == selected_ward]
-        fig.add_trace(go.Scattermapbox(
+        fig.add_trace(go.Scattermap(
             lat=filtered["latitude"], lon=filtered["longitude"],
             mode="markers", marker=dict(size=4, color="blue", opacity=0.6),
             name="Vacant parcels"
@@ -226,7 +226,7 @@ if selected_ward != "Citywide":
     if zoom_mode == "Selected ward":
         center = gdf[gdf["ward"] == selected_ward].geometry.centroid.iloc[0]
         fig.update_layout(
-            mapbox=dict(center=dict(lat=center.y, lon=center.x), zoom=11.5)
+            map=dict(center=dict(lat=center.y, lon=center.x), zoom=11.5)
         )
 
 st.plotly_chart(fig, use_container_width=True)
