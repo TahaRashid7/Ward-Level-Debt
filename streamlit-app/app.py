@@ -177,48 +177,7 @@ else:
     col4.metric("Outstanding Debt",    f"${ward_row['Outstanding Debt ($M)']:.1f}M")
     col5.metric("Risk Tier",           ward_row["risk_tier"])
 
-# -----------------------------
-# TEMPORARY — DEBT SCOPE RECONCILIATION
-# Delete this whole block once you have read the numbers.
-# -----------------------------
-with st.expander("Debt scope reconciliation (temporary)", expanded=True):
-    cats = sorted(debt_long["category"].unique().tolist())
-    svc  = [c for c in cats if "Service" in c]
-    pen  = [c for c in cats if "Penalty" in c]
 
-    ws_svc = [c for c in svc if "Water" in c or "Sewer" in c]
-    ws_pen = [c for c in pen if "Water" in c or "Sewer" in c]
-    w_svc  = [c for c in svc if "Water" in c]
-    w_pen  = [c for c in pen if "Water" in c]
-
-    def tot(sub):
-        return float(debt_long[debt_long["category"].isin(sub)]["amount_m"].sum())
-
-    def pct(a, b):
-        return round(100 * a / (a + b), 1) if (a + b) else 0.0
-
-    rows = []
-    for label, s_cats, p_cats in [
-        ("All categories",       svc,    pen),
-        ("Water + sewer only",   ws_svc, ws_pen),
-        ("Water only",           w_svc,  w_pen),
-    ]:
-        s_amt, p_amt = tot(s_cats), tot(p_cats)
-        rows.append({
-            "Scope":        label,
-            "Service ($M)": round(s_amt, 1),
-            "Penalty ($M)": round(p_amt, 1),
-            "Total ($M)":   round(s_amt + p_amt, 1),
-            "Penalty %":    pct(p_amt, s_amt),
-        })
-
-    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
-
-    st.caption("Categories present in the data: " + ", ".join(cats))
-    st.caption(
-        f"Grand total across every category: "
-        f"${debt_long['amount_m'].sum():,.1f}M"
-    )
 
 # -----------------------------
 # MAP
